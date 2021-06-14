@@ -36,7 +36,7 @@ Write geodatabase details to file.
         * cardinality
         * classKey
         * keyType
-        * isAttachment
+		* isAttachment
         * isAttributed
         * isComposite
         * isReflexive
@@ -131,27 +131,27 @@ class DescribeDatabase(object):
                     unique = len(set([row for row in arcpy.da.SearchCursor(table, field.name)]))
                 except:
                     unique = 'Unknown'
-			field_desc = (
-				field.name,
-				field.type,
-				field.length,
-				field.aliasName, 
-				field.domain,
-				field.defaultValue,
-				field.isNullable,
-				field.required,
-				field.editable,            
-				field.precision,
-				field.scale,
-				unique
-				)
-			fields.append(field_desc)
+                field_desc = (
+                    field.name,
+                    field.type,
+                    field.length,
+                    field.aliasName, 
+                    field.domain,
+                    field.defaultValue,
+                    field.isNullable,
+                    field.required,
+                    field.editable,
+                    field.precision,
+                    field.scale,
+                    unique,
+                    )
+                fields.append(field_desc)
+                
+            table = []
+            for field in fields:
+                table.append(field)
 
-		table = []
-		for field in fields:
-			table.append(field)
-
-		df_table = pd.DataFrame(table, columns=['Name', 'DataType', 'Length', 'AliasName', 'Domain', 'DefaultValue', 'IsNullable', 'Required', 'Editable', 'Precision', 'Scale', 'UniqueRecordCount'])
+            df_table = pd.DataFrame(table, columns=['Name', 'DataType', 'Length', 'Alias', 'Domain', 'DefaultValue', 'IsNullable', 'Required','Editable', 'Precision', 'Scale', 'UniqueRecordCount'])
 
             df_table.to_csv(dest_csv, index=False)
 
@@ -163,34 +163,34 @@ class DescribeDatabase(object):
             desc_list = []
             
             for rc in rc_list:  
-                 rc_path = os.path.join(gdb, rc)
-                 des_rc = arcpy.Describe(rc_path)  
-                 rel_class_details = (
-                     rc,
-                     des_rc.originClassNames,
-                     des_rc.destinationClassNames,                     
-                     des_rc.originClassKeys,
-                     des_rc.destinationClassKeys,
-                     des_rc.forwardPathLabel,
-                     des_rc.backwardPathLabel,
-                     des_rc.cardinality,
-                     des_rc.classKey,
-                     des_rc.keyType,
-                     des_rc.IsAttachmentRelationship,
-                     des_rc.isAttributed,
-                     des_rc.isComposite,
-                     des_rc.isReflexive,
-                     des_rc.notification)
-                 desc_list.append(rel_class_details)
+                rc_path = os.path.join(gdb, rc)
+                des_rc = arcpy.Describe(rc_path)
+                rel_class_details = (
+                    rc,
+                    des_rc.originClassNames,
+                    des_rc.destinationClassNames,
+                    des_rc.originClassKeys,
+                    des_rc.destinationClassKeys,
+                    des_rc.forwardPathLabel,
+                    des_rc.backwardPathLabel,
+                    des_rc.cardinality,
+                    des_rc.classKey,
+                    des_rc.keyType,
+                    des_rc.IsAttachmentRelationship,
+                    des_rc.isAttributed,
+                    des_rc.isComposite,
+                    des_rc.isReflexive,
+                    des_rc.notification)
+                desc_list.append(rel_class_details)
 
             df_relationships = pd.DataFrame(desc_list, columns=['Relationship_Name',
-                        'Origin_Class_Name','Destination_Class_Name',
-                        'Origin_Class_Key','Destination_Class_Key', 
-                        'Forward_Path_Label', 'Backward_Path_Label',
-                        'Cardinality', 'Class_Key', 'Key_Type', 'Is_Attachment',
-                        'Is_Attributed', 'Is_Composite', 'Is_Reflexive',
-                        'Notification'])
-            
+						'Origin_Class_Name','Destination_Class_Name',
+						'Origin_Class_Key','Destination_Class_Key', 
+						'Forward_Path_Label', 'Backward_Path_Label',
+						'Cardinality', 'Class_Key', 'Key_Type', 'Is_Attachment',
+						'Is_Attributed', 'Is_Composite', 'Is_Reflexive',
+						'Notification'])
+			
             df_relationships.to_csv(os.path.join(output_folder,'Relationship_Classes.csv'), index=False)
                         
         # Set the workspace to gdb
