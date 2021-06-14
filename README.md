@@ -32,7 +32,7 @@ Replaced dependency on [Python csv module](https://docs.python.org/3/library/csv
         * cardinality
         * classKey
         * keyType
-		* isAttachment
+	* isAttachment
         * isAttributed
         * isComposite
         * isReflexive
