@@ -3,7 +3,8 @@ Python toolbox for describing the structure of an ArcGIS geodatabase. Forked fro
 Python 3 code updated to run in ArcGIS Pro 2.7+.
 Replaced dependency on [Python csv module](https://docs.python.org/3/library/csv.html) with [pandas.DataFrame.to_csv](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_csv.html). Use of pandas DataFrame intended to allow for further extension.
 
-## Purpose: Write geodatabase structural details to file. Python-based replacement for some functionality of [X-Ray for ArcCatalog](https://www.arcgis.com/home/item.html?id=9ea218ff575f4a5195e01a2cae03a0ae), which is only available for ArcGIS 10.x.
+## Purpose:
+### Write geodatabase structural details to file. Python-based replacement for some functionality of [X-Ray for ArcCatalog](https://www.arcgis.com/home/item.html?id=9ea218ff575f4a5195e01a2cae03a0ae), which is only available for ArcGIS 10.x.
 
     Will create a unique .csv table for each table or feature class in a database detailing for each field:
         * name
@@ -39,7 +40,7 @@ Replaced dependency on [Python csv module](https://docs.python.org/3/library/csv
 
 ## To Do:
 
-- Feature Dataset & Feature Class properties
+- Feature Dataset & Feature Class properties (joined with attribute table for presentation)
 - Topology properties
 - Geometric network properties
 - Raster properties
