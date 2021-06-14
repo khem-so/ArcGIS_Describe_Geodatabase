@@ -23,6 +23,7 @@ Replaced dependency on [Python csv module](https://docs.python.org/3/library/csv
     Will create a unique csv for each domain
     
     Will create a csv detailing all the relationship classes in a database:
+    	* relationshipClassName
         * originClassName
         * destinationClassName
         * originClassKey
