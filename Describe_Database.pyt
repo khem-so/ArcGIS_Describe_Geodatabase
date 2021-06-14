@@ -2,53 +2,59 @@
 
 """
 Author:
-Michael Troyer
+Michael Troyer, updated by Khem So
 
 Date:
-12/19/2017
+6/14/2021
 
 Purpose:
 Write geodatabase details to file.
 
     Will create a unique .csv table for each table or feature class in a database detailing:
         * name
-        * aliasName
         * type
         * length
-        * precision
-        * scale
-        * defaultValue
+        * aliasName
         * domain
-        * editable
+        * defaultValue
         * isNullable
         * required
-        * unique records
+        * editable
+        * precision
+        * scale
+        * unique record count
 
     Will create a unique csv for each domain
 
     Will create a csv detailing all the relationship classes in a database:
         * originClassName
-        * originClassKey
         * destinationClassName
+        * originClassKey
         * destinationClassKey
         * forwardPathLabel
         * backwardPathLabel
         * cardinality
         * classKey
         * keyType
+        * isAttachment
         * isAttributed
         * isComposite
         * isReflexive
         * notification
 
-TODO: add support for topologies
+To Do:
+
+- Feature Dataset & Feature Class properties
+- Topology properties
+- Geometric network properties
+- Raster properties
+- Export to HTML (X-Ray for ArcCatalog data dictionary replacement)
 
 """
 
-import csv
 import os
 import sys
-
+import pandas as pd
 import arcpy
 
 
@@ -125,31 +131,29 @@ class DescribeDatabase(object):
                     unique = len(set([row for row in arcpy.da.SearchCursor(table, field.name)]))
                 except:
                     unique = 'Unknown'
-                field_desc = (
-                    field.name,
-                    field.aliasName, 
-                    field.type,
-                    field.length,
-                    field.precision,
-                    field.scale,
-                    field.defaultValue,
-                    field.domain,
-                    field.editable,
-                    field.isNullable,
-                    field.required,
-                    unique,
-                    )
-                fields.append(field_desc)
-                
-            with open(dest_csv, 'wb') as csvfile:
-                csvwriter = csv.writer(csvfile)
-                csvwriter.writerow(
-                    ['NAME', 'ALIAS', 'TYPE', 'LENGTH', 'PRECISION', 'SCALE',
-                     'DEFAULT', 'DOMAIN', 'EDITABLE', 'ISNULLABLE', 'REQUIRED',
-                     'UNIQUE'])
-            
-                for field in fields:
-                        csvwriter.writerow(field)
+			field_desc = (
+				field.name,
+				field.type,
+				field.length,
+				field.aliasName, 
+				field.domain,
+				field.defaultValue,
+				field.isNullable,
+				field.required,
+				field.editable,            
+				field.precision,
+				field.scale,
+				unique
+				)
+			fields.append(field_desc)
+
+		table = []
+		for field in fields:
+			table.append(field)
+
+		df_table = pd.DataFrame(table, columns=['Name', 'DataType', 'Length', 'AliasName', 'Domain', 'DefaultValue', 'IsNullable', 'Required', 'Editable', 'Precision', 'Scale', 'UniqueRecordCount'])
+
+            df_table.to_csv(dest_csv, index=False)
 
 
         def describe_Relationships(gdb, output_folder):  
@@ -162,34 +166,32 @@ class DescribeDatabase(object):
                  rc_path = os.path.join(gdb, rc)
                  des_rc = arcpy.Describe(rc_path)  
                  rel_class_details = (
+                     rc,
                      des_rc.originClassNames,
+                     des_rc.destinationClassNames,                     
                      des_rc.originClassKeys,
-                     des_rc.destinationClassNames,
                      des_rc.destinationClassKeys,
                      des_rc.forwardPathLabel,
                      des_rc.backwardPathLabel,
                      des_rc.cardinality,
                      des_rc.classKey,
                      des_rc.keyType,
+                     des_rc.IsAttachmentRelationship,
                      des_rc.isAttributed,
                      des_rc.isComposite,
                      des_rc.isReflexive,
                      des_rc.notification)
                  desc_list.append(rel_class_details)
 
-            if desc_list:
-                with open(os.path.join(output_folder, 'RELATIONSHIP_CLASSES.csv'), 'wb') as csvfile:
-                    csvwriter = csv.writer(csvfile)
-                    csvwriter.writerow(
-                        ['ORIGIN_CLASS_NAME', 'ORIGIN_CLASS_KEY',
-                         'DESTINATION_CLASS_NAME', 'DESTINATION_CLASS_KEY', 
-                         'FORWARD_PATH_LABEL', 'BACKWARD_PATH_LABEL',
-                         'CARDINALITY', 'CLASS_KEY', 'KEY_TYPE',
-                         'IS_ATTRIBUTED', 'IS_COMPOSITE', 'IS_REFLEXIVE',
-                         'NOTIFICATION'])
-
-                    for rel_class in desc_list:
-                        csvwriter.writerow(rel_class)
+            df_relationships = pd.DataFrame(desc_list, columns=['Relationship_Name',
+                        'Origin_Class_Name','Destination_Class_Name',
+                        'Origin_Class_Key','Destination_Class_Key', 
+                        'Forward_Path_Label', 'Backward_Path_Label',
+                        'Cardinality', 'Class_Key', 'Key_Type', 'Is_Attachment',
+                        'Is_Attributed', 'Is_Composite', 'Is_Reflexive',
+                        'Notification'])
+            
+            df_relationships.to_csv(os.path.join(output_folder,'Relationship_Classes.csv'), index=False)
                         
         # Set the workspace to gdb
         arcpy.env.workspace = gdb
